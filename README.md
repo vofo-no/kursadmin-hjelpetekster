@@ -18,6 +18,9 @@ Hver hjelpetekst består av følgende elementer:
 
 Hjelpeteksten binder et definert hjelpesymbol til det valgte objektet, og vises som en "lapp" på skjermen når brukeren trykker på hjelpesymbolet.
 
+Demonstrasjon: https://cdn.rawgit.com/vofo-no/kursadmin-hjelpetekster/master/demo/index.html
+Eksempel på JSON-dokument: https://github.com/vofo-no/kursadmin-hjelpetekster/blob/master/demo/1-01.json
+
 *Nettbasert kontrollpanel* for å administrere hjelpetekstene. Her er det enkelt for administratorer å opprette, endre og forhåndsvise hjelpetekster. Hjelpetekstene fra kontrollpanelet bygges fortløpende og legges rett inn i testmiljøet for KursAdmin, slik at administrator kan se hvordan de fungerer i praksis. Deretter kan de ferdige hjelpetekstene legges ut i produksjon - dette krever et ekstra skritt for å hindre feil.
 
 Hosting og produksjon
