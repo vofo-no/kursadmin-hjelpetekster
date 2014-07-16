@@ -22,7 +22,7 @@ Demonstrasjon: https://hjelpetekst.appspot.com/demo/index.html
 
 Eksempel på JSON-dokument: https://github.com/vofo-no/kursadmin-hjelpetekster/blob/master/demo/1-01.json
 
-*Nettbasert kontrollpanel* for å administrere hjelpetekstene. Her er det enkelt for administratorer å opprette, endre og forhåndsvise hjelpetekster. Hjelpetekstene fra kontrollpanelet bygges fortløpende og legges rett inn i testmiljøet for KursAdmin, slik at administrator kan se hvordan de fungerer i praksis. Deretter kan de ferdige hjelpetekstene legges ut i produksjon - dette krever et ekstra skritt for å hindre feil.
+[Nettbasert kontrollpanel](https://hjelpetekst.appspot.com) til å administrere hjelpetekstene. Her er det enkelt for administratorer å opprette, endre og forhåndsvise hjelpetekster. Hjelpetekstene fra kontrollpanelet bygges fortløpende og legges rett inn i testmiljøet for KursAdmin, slik at administrator kan se hvordan de fungerer i praksis. Deretter kan de ferdige hjelpetekstene legges ut i produksjon - dette krever et ekstra skritt for å hindre feil.
 
 Hosting og produksjon
 ---------------------
