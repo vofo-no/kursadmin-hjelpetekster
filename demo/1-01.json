@@ -1,12 +1,12 @@
 { "hjelp": [
 	{
-		"id": "P3110_CURR_BTNS",
+		"selector": "P3110_CURR_BTNS",
 		"tittel": "Demonstrasjon av 'hjelpetekst'",
 		"tekst": "Denne teksten viser deg hvordan det vil se ut når brukeren klikker på et hjelpesymbol. Teksten skal være lett å lese og lett å forstå. Og ikke for lang.",
 		"video": "//www.youtube.com/embed/ybp-30dkt5w",
 		"link": "http://funkis.no/node/145"
 	},{
-		"id": "P3110_CRS_HOURS_ONLINE",
+		"selector": "P3110_CRS_HOURS_ONLINE",
 		"tittel": "Demonstrasjon av en \"annen\" hjelpetekst",
 		"tekst": "Denne teksten viser deg hvordan det vil se ut når brukeren klikker på et hjelpesymbol. Teksten skal være lett å lese og lett å forstå. Og ikke for lang.",
 		"video": "//www.youtube.com/embed/ybp-30dkt5w",

@@ -285,7 +285,7 @@ class AuthHandler(webapp2.RequestHandler):
 
 class Hjelpetekster(webapp2.RequestHandler):
 	def get(self, stf, side):
-		self.response.headers['Access-Control-Allow-Origin'] = 'chrome-extension://ojginedpobgpcdmofpkklkkcdadjdbom'
+		self.response.headers['Access-Control-Allow-Origin'] = 'http://test.senitel.no'
 		self.response.headers['Content-Type'] = 'application/json'
 		self.response.write(hjelpeteksterJSON(stf, side))
 
