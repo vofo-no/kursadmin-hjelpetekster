@@ -1,5 +1,5 @@
 (function(stf, vis, baseUrl){
-		var xmlhttp;
+		var xmlhttp, start = new Date().getTime();
 		if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
 			xmlhttp=new XMLHttpRequest();
 		}
@@ -19,13 +19,14 @@
 				dialog.id = "hjelpetekst_dialog";
 				document.body.appendChild(dialog);
 				// Javascript function JSON.parse to parse JSON data
-				var j = JSON.parse(xmlhttp.responseText);
+				var j = JSON.parse(xmlhttp.responseText), c = 0;
 				function san(s){ return s.replace(/"/g, '&quot;').replace(/'/g, "\\'"); }
 				if("hjelp" in j) {
 					for (var i = 0; i < j.hjelp.length; i ++) {
 						var h = j.hjelp[i];
 						var o = document.getElementById(h.id);
 						if(o) {
+							c++;
 							(function(t,h,o){
 								t.innerHTML = "?";
 								t.className = 'hjelpetekst';
@@ -38,6 +39,7 @@
 							console.log("Elementet '" + h.id + "' finnes ikke i denne visningen, og bør fjernes fra dokumentet.");
 						}
 					}
+					console.log("Hjelpetekster.js har lagt inn " + c + " hjelpetekster på denne visningen. Prosessen tok " + (new Date().getTime() - start) + " ms.");
 				}
 			}
 		}
