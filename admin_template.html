@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+{% autoescape true %}
+<html lang=nb><head><meta charset=utf-8><title>Hjelpetekst for KursAdmin</title>
+<meta name=viewport content="width=device-width, initial-scale=1">
+<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/lumen/bootstrap.min.css" rel="stylesheet">
+<style>
+/* Space out content a bit */
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.marketing,
+.footer {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/* Custom page header */
+.header {
+  border-bottom: 1px solid #e5e5e5;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h3 {
+  padding-bottom: 19px;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 40px;
+}
+
+/* Custom page footer */
+.footer {
+  padding-top: 19px;
+  color: #777;
+  border-top: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+.container-narrow > hr {
+  margin: 30px 0;
+}
+
+/* Main marketing message and sign up button */
+.jumbotron {
+  text-align: center;
+}
+.jumbotron .btn {
+  padding: 14px 24px;
+  font-size: 21px;
+}
+
+/* Supporting marketing content */
+.marketing {
+  margin: 40px 0;
+}
+.marketing p + h4 {
+  margin-top: 28px;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  /* Remove the padding we set earlier */
+  .header,
+  .marketing,
+  .footer {
+    padding-right: 0;
+    padding-left: 0;
+  }
+  /* Space out the masthead */
+  .header {
+    margin-bottom: 30px;
+  }
+}
+
+</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<ul class="nav nav-pills pull-right">
+				<li><a href="#komigang">Kom i gang</a></li>
+			{% if user %}
+				<li class="active"><a href="{{loginUrl}}"><span class="glyphicon glyphicon-log-out"></span> Logg ut</a></li>
+			{% else %}
+				<li class="active"><a href="{{loginUrl}}"><span class="glyphicon glyphicon-log-in"></span> Logg inn</a></li>
+			{% endif %}
+			</ul>
+			<h3 class="text-muted" title="Administrasjonsprogram for hjelpetekster i KursAdmin">Hjelpetekst for KursAdmin</h3>
+		</div>
+	{% if not editor %}
+		<div class="jumbotron">
+			<h1>Lag hjelpetekster</h1>
+			<p class="lead">Dette programmet hjelper deg å lage og administrere hjelpetekster til <a href="http://www.kursadmin.org">KursAdmin</a>. Hjelpetekstene kan vise forklarende tekst og videoinstruksjoner til brukerne ved vanskelige felt.</p>
+			{% if user %}
+			<p>
+				<select name="stf" id="stf" class="form-control input-lg" style="margin-bottom:15px" onchange="window.location = '/' + this.options[this.selectedIndex].value;">
+					<option value="">-- Velg studieforbund --</option>
+					{% for forbund in studieforbund %}
+					<option value="{{ forbund.nr }}"{% if forbund.nr == stf %} selected="selected"{% endif %}>{{ forbund.navn }}</option>
+					{% endfor %}
+				</select>
+				{% if stf and not editor and user %}
+					{% if not pending %}
+						<div><textarea id="beomtilgang_merknad" class="form-control input-lg" placeholder="Hvem er du, og hvorfor skal du ha tilgang?" style="margin-bottom:15px"></textarea></div>
+						<button type="button" id="beomtilgang" class="btn btn-info">Søk om tilgang</button>
+					{% else %}
+						<button type="button" class="btn btn-info" disabled="disabled">Venter på tilgang...</button>
+					{% endif %}
+				{% endif %}
+			</p>
+			{% else %}<p><a class="btn btn-lg btn-success" href="{{loginUrl}}" role="button">Logg inn nå</a></p>{% endif %}
+		</div>
+	{% else %}
+		<div class="row">
+			<div class="col-sm-4">
+				<select name="stf" class="form-control input-md" onchange="window.location = '/' + this.options[this.selectedIndex].value;">
+					<option value="">-- Velg studieforbund --</option>
+					{% for forbund in studieforbund %}
+					<option value="{{ forbund.nr }}"{% if forbund.nr == stf %} selected="selected"{% endif %}>{{ forbund.navn }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-sm-4">
+				<select name="side" class="form-control input-md" onchange="window.location = '/{{ stf }}/' + this.options[this.selectedIndex].value;">
+				<option value="">-- Velg visning --</option>
+				{% for siden in sider %}
+					<option value="{{ siden.nr }}"{% if siden.nr == side %} selected="selected"{% endif %}>{{ siden.nr }} {{ siden.navn }}</option>
+				{% endfor %}
+				</select>
+			</div>
+			{% if side %}
+			<div class="col-sm-2 col-xs-6">
+				<a href="/{{ stf }}/{{ side }}/create" class="btn btn-success btn-block" title="Lag en ny hjelpetekst i den aktuelle visningen"><span class="glyphicon glyphicon-plus"></span> Ny</a>
+			</div>
+			<div class="col-sm-2 col-xs-6">
+				<a href="/{{ stf }}/{{ side }}/publiser" class="btn btn-warning btn-block" id="leggut" title="Legg ut i produksjon"><span class="glyphicon glyphicon-upload"></span> Legg ut</a>
+			</div>
+			{% endif %}			
+		</div>
+		<hr>
+		{% if hjelpetekster %}
+			{% if entity %}
+			<form role="form" class="text-left" method="post" action="/{{ stf }}/{{ side }}/{{ entity }}">
+			<h3>Rediger hjelpetekst</h3>
+				<div class="form-group">
+					<label for="selector">Objekt-ID <small class="text-muted">&nbsp; identifiserer objektet hjelpeteksten skal bindes til</small></label>
+					<input type="text" name="selector" id="selector" required class="form-control" value="{{ hjelpetekster[0].selector }}">
+				</div>
+				<div class="form-group">
+					<label for="tittel">Tittel <small class="text-muted">&nbsp; tittel på denne hjelpeteksten</small></label>
+					<input type="text" name="tittel" id="tittel" required class="form-control" value="{{ hjelpetekster[0].tittel }}">
+				</div>
+				<div class="form-group">
+					<label for="tekst">Tekst <small class="text-muted">&nbsp; hjelpetekstens innhold</small></label>
+					<textarea name="tekst" id="tekst" class="form-control">{{ hjelpetekster[0].tekst }}</textarea>
+				</div>
+				<div class="form-group">
+					<label for="video">YouTube-video <small class="text-muted">&nbsp; link til instruksjonsvideo på YouTube</small></label>
+					<input type="text" name="video" id="video" class="form-control" value="{{ hjelpetekster[0].video }}">
+				</div>
+				<div class="form-group">
+					<label for="link">Les mer <small class="text-muted">&nbsp; link til mer informasjon om funksjonen</small></label>
+					<input type="text" name="link" id="link" class="form-control" value="{{ hjelpetekster[0].link }}">
+				</div>
+				<div class="checkbox"><label><input type="checkbox" name="publisert" id="publisert" value="true"{% if hjelpetekster[0].publisert %} checked{% endif %}> Publisert</label></div>
+				<p>
+					{% if editor %}
+					<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Lagre</button>
+					<button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Slett</button>
+					{% endif %}
+					<a href="./" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Tilbake</a>
+					<button type="button" class="btn btn-warning" id="fhvht"><span class="glyphicon glyphicon-zoom-in"></span> Forhåndsvis</button>
+				</p>
+			</form>
+			{% else %}
+			<table class="table table-hover table-striped text-left">
+				<thead>
+				<tr><th>Tittel</th><th>Objekt-ID</th><th>Endret</th></tr>
+				</thead>
+				<tbody>
+			{% for hjelpetekst in hjelpetekster %}
+				<tr><td>{% if hjelpetekst.publisert %}<span class="glyphicon glyphicon-eye-open" title="Publisert"></span>{% else %}<span class="glyphicon glyphicon-eye-closed" title="Ikke publisert"></span>{% endif %} <a href="/{{ stf }}/{{ side }}/{{hjelpetekst.key.urlsafe()}}" title="Klikk for å vise eller endre denne oppføringen">{{ hjelpetekst.tittel }}</a></td>
+					<td>{{ hjelpetekst.selector }}</td>
+					<td>{{ hjelpetekst.endret.strftime("%d.%m.%Y %H:%M") }} av {{ hjelpetekst.bruker }}</td>
+					</tr>
+			{% endfor %}
+				</tbody>
+			</table>
+			{% endif %}
+		{% else %}
+			{% if side %}
+				<div class="alert alert-info"><em>Ingen hjelpetekster er lagt inn i denne visiningen.</em></div>
+			{% else %}
+				<div class="alert alert-warning"><em>Velg en visning fra lista over.</em></div>
+			{% endif %}
+		{% endif %}
+		<hr>
+	{% endif %}
+		<h2 id="komigang">Kom i gang med hjelpetekster</h2>
+		<p class="lead">Her er noen enkle instrukser for å hjelpe deg i gang.</p>
+		<h3>1. Logg inn og få tilgang</h3>
+		<p>Aller først må du logge inn. Du kan bruke en eksisterende Google-konto, eller opprette en ny. Når du er innlogget må du få tilgang til å redigere i ditt studieforbund. Velg studieforbundet ditt, og klikk "Søk om tilgang". Denne søknaden behandles manuelt, så ta høyde for at det kan ta noen dager før du får tilgang.</p>
+		<h3>2. Velg visning</h3>
+		<p>Når du er logget inn og har valgt riktig studieforbund, må du velge hvilken visning du skal lage hjelpetekster for. Du får da opp en liste over alle eksisterende hjelpetekster i den aktuelle visningen.</p>
+		<h3>3. Lag og rediger hjelpetekster</h3>
+		<p>Du kan opprette en ny, eller redigere en eksisterende hjelpetekst. Du kan når som helst forhåndsvise endringene dine. Husk å lagre endringene.</p>
+		<h3>4. Test og publiser</h3>
+		<p>Logg inn i testmiljøet i KursAdmin og sjekk at hjelpetekstene du har endret eller lagt inn oppfører seg som du forventer. Dersom alt er i orden, kan du gå tilbake til visningen i dette programmet, og velge "Legg ut i produksjon". Endringene vil være synlig i KursAdmin i løpet av kort tid.</p>
+		<p>Lykke til!</p>
+		<div class="footer">
+			{% if user %}<p class="text-center">Du er logget inn som <strong>{{ user }}</strong>. (<a href="{{url}}">Logg ut</a>)</p>{% endif %}
+			<p class="text-center">&copy; 2014 <a href="http://www.funkis.no">Studieforbundet Funkis</a> &nbsp;·&nbsp; Utviklet av <a href="http://www.vofo.no">Voksenopplæringsforbundet</a> &nbsp;·&nbsp; <a href="https://github.com/vofo-no/kursadmin-hjelpetekster/">GitHub</a></p>
+		</div>
+	{% if autorisasjoner %}
+		<h4>Admin</h4>
+		<ul class="list-group">
+		{% for autorisasjon in autorisasjoner %}
+			<li class="list-group-item"><h4 class="list-group-item-heading">{% if not autorisasjon.godkjent %}<button class="btn btn-sm pull-right btn-info" onclick="authGodkjenn('{{ autorisasjon.key.urlsafe() }}',this)" style="margin-left: 4px">Godkjenn</button>{% endif %}<button class="btn btn-sm btn-danger pull-right" onclick="authSlett('{{ autorisasjon.key.urlsafe() }}', this)">Slett</button>{% if autorisasjon.godkjent %}<span class="badge badge-success">Godkjent</span> {% endif %}{{ autorisasjon.bruker.nickname() }}</h4>
+				<p class="list-group-item-text">{{ autorisasjon.merknad }}</p>
+			</li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+	</div>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="/js/site.js"></script>
+</body></html>
+{% endautoescape %}
