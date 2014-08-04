@@ -13,6 +13,10 @@ handlers:
   static_dir: js
   secure: always
 
+- url: /crx
+  static_dir: crx
+  secure: always
+
 - url: /.*
   script: hjelpetekst.app
   secure: always
