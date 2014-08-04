@@ -1,0 +1,1 @@
+!function(a,b,c){var d,e=a.getElementsByTagName(b)[0];a.getElementById(c)||(d=a.createElement(b),d.id=c,d.src="https://hjelpetekst.appspot.com/js/hjelpetekst.js",e.parentNode.insertBefore(d,e))}(document,"script","hjelpetekst-js");

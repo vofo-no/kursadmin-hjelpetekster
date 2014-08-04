@@ -1,0 +1,23 @@
+{
+  "name": "KursAdmin hjelpetekst-tester",
+  "description" : "Verktøy for å teste KursAdmin-hjelpetekster i programmet før dette er lagt inn på ordentlig.",
+  "version": "1.0",
+  "background": {
+	"scripts": ["finnobjektid.js"],
+	"persistent": false
+  },
+  "page_action": {
+	"default_icon": "icon19.png",
+	"default_title": "Hjelp til å plassere hjelpetekster"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.kursadmin.org/pls/kas/*", "http://test.senitel.no/pls/kastest/*"],
+      "js": ["kursadminfix.js"]
+    }
+  ],
+  "permissions": [
+    "https://www.kursadmin.org/*", "http://test.senitel.no/pls/kastest/*", "declarativeContent", "activeTab"
+  ],
+  "manifest_version": 2
+}
