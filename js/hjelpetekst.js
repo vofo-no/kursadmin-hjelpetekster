@@ -31,6 +31,7 @@
 								t.className = 'hjelpetekst';
 								t.onclick = function () { hjelpetekst(h.tittel, h.tekst, encodeURI(h.video), encodeURI(h.link));}
 								t.title = h.tittel + ' (Klikk for hjelp)';
+								t.href = "javascript:void(0)" // This will add me to tabindex.
 								o.parentNode.insertBefore(t, o.nextSibbling);							
 							}(document.createElement('a'), h, o));
 						}
@@ -113,5 +114,15 @@
 			v.setAttribute("allowfullscreen", "");
 			d.parentNode.insertBefore(v, d);
 			}
+		}
+		window.hjelpetekstKeyPress = function(e) {
+			e = e || window.event;
+			if(e.keyCode==27){ hjelpetekstHide(); }
+		}
+		if(window.addEventListener){
+			window.addEventListener("keydown", hjelpetekstKeyPress, false);
+		}
+		else {
+			window.attachEvent("onkeydown", hjelpetekstKeyPress);
 		}
 	})(window.hjelpetekstStf || document.getElementById("pFlowId").value || "", window.hjelpetekstVis || document.getElementById("pFlowStepId").value || "", window.hjelpetekstUrl || false);
