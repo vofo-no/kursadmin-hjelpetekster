@@ -94,6 +94,7 @@
 			while(d.firstChild){
 				d.removeChild(d.firstChild);
 			}
+			d.style.visibility = "hidden";
 		}
 		window.hjelpetekstVideo = function(vid) {
 			var d = document.getElementById("hjelpetekst_dialog").getElementsByTagName("p")[0];
