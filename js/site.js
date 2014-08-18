@@ -132,7 +132,7 @@ site.js
 	else if(suc==4){	$(".top-left").notify({message: {text: "Endringene er lagret.", type: "success"}}).show();}
 	
 	$("#video").on("focusout", function() { if(ytVidId($(this).val())) { $(this).val('//www.youtube.com/embed/' + ytVidId($(this).val())); } });
-	$("#fhvht").on("click", function() { hjelpetekst($("#tittel").val(), $("#tekst").val(), $("#video").val(), $("#link").val()); });
+	$("#fhvht").on("click", function() { $.hjelpetekst.show($("#tittel").val(), $("#tekst").val(), $("#video").val(), $("#link").val()); });
 	$("#fhvmd").on("click", function() { $("#fhvdiv").html("Laster forhåndsvisning...").load("/md", {"raw": $("#raw").val()}); });
 	$("#leggut").on("click", function(e) {
 		e.preventDefault();
