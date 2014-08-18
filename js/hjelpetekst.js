@@ -9,6 +9,7 @@
 			var c = 0;
 			stf = typeof stf !== 'undefined' ? stf : $('#pFlowId').val() || '';
 			vis = typeof vis !== 'undefined' ? vis : $('#pFlowStepId').val() || '';
+			baseUrl = typeof baseUrl !== 'undefined' ? baseUrl : location.hostname === 'www.kursadmin.org' ? 'https://storage.googleapis.com/hjelpetekst.appspot.com/h1' : 'https://hjelpetekst.appspot.com/json-dev';
 			//define functions
 			var checkAndInsertContainers = function($ht_body, $ht_cont, $ht_tabs){
 									if (!$ht_cont.length) {
@@ -43,7 +44,6 @@
 								$t.on('click', function () { $.hjelpetekst.show(h.tittel, h.tekst, encodeURI(h.video), encodeURI(h.link));});
 								$t.insertAfter($o);
 							};
-			baseUrl = typeof vis !== 'undefined' ? baseUrl : location.hostname === 'www.kursadmin.org' ? 'https://storage.googleapis.com/hjelpetekst.appspot.com/h1' : 'https://hjelpetekst.appspot.com/json-dev';
 			$.getJSON(baseUrl + '/' + stf + '-' + vis + '.json', function(data) {
 				(function($stylesheet, $dialog){
 					$('head').append($stylesheet);
