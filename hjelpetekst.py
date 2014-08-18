@@ -7,18 +7,16 @@ import urllib
 
 import webapp2
 import json
-import jinja2
+
+from webapp2_extras import jinja2
+
+import markdown
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
 from google.appengine.api import mail
 from google.appengine.api import app_identity
 import cloudstorage as gcs
-
-JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
 
 studieforbund = [
 	#{ 'nr':'350','navn':u'Akademisk studieforbund' },
@@ -39,6 +37,8 @@ studieforbund = [
 	]
 sider = [
 	{ 'nr':'101','navn':u'Logg inn' },
+	{ 'nr':'HJEM','navn':u'Startside' },
+	{ 'nr':'FAQ','navn':u'Ofte stilte spørsmål' },
 	{ 'nr':'1000','navn':u'Hjem forside' },
 	{ 'nr':'2000','navn':u'Studieplan søk' },
 	{ 'nr':'2410','navn':u'Rediger studieplan steg 1' },
@@ -66,17 +66,27 @@ sider = [
 	{ 'nr':'3190','navn':u'Rediger kurs - steg 10' }
 	]
 
-"""Studieforbund-nøkkel"""
+tekstsider = ['FAQ', 'HJEM']
+
 def studieforbund_key(studieforbund_nr='0000',side='0'):
+	"""Studieforbund-nøkkel for å plassere i rett entity-group.
+	
+	:param studieforbund_nr:
+		string som identifiserer studieforbundet
+	:param side:
+		string som identifiserer en visning.
+	:returns:
+		ndb.Key
+	"""
 	return ndb.Key('StudieforbundSide', studieforbund_nr + ':' + side)
 
-"""Modell for hjelpetekster."""
 class Hjelpetekst(ndb.Model):
+	"""Modell for hjelpetekster."""
 	selector = ndb.StringProperty(default='',required=True)
 	tittel = ndb.StringProperty(indexed=False,default='',required=True)
-	tekst = ndb.StringProperty(indexed=False,default='')
-	video = ndb.TextProperty(indexed=False,default='')
-	link = ndb.TextProperty(indexed=False,default='')
+	tekst = ndb.TextProperty(indexed=False,default='')
+	video = ndb.StringProperty(indexed=False,default='')
+	link = ndb.StringProperty(indexed=False,default='')
 	endret = ndb.DateTimeProperty(auto_now=True,indexed=False)
 	bruker = ndb.UserProperty(indexed=False)
 	publisert = ndb.BooleanProperty()
@@ -89,8 +99,16 @@ class Hjelpetekst(ndb.Model):
 	def query_side_public(cls, stf, side):
 		return cls.query(cls.publisert == True, ancestor=studieforbund_key(stf, side)).order(cls.selector)
 
-"""Modell for autorisasjon av brukere til ulike studieforbund. Hvis bruker ikke er admin, kreves en autorisasjon for det aktuelle studieforbundet."""
+class Tekst(ndb.Model):
+	"""Modell for markdown-sider."""
+	raw = ndb.TextProperty(default='',indexed=False)
+	html = ndb.TextProperty(default='',indexed=False)
+	endret = ndb.DateTimeProperty(auto_now=True,indexed=False)
+	bruker = ndb.UserProperty(indexed=False)
+	publisert = ndb.BooleanProperty()
+		
 class Autorisasjon(ndb.Model):
+	"""Modell for autorisasjon av brukere til ulike studieforbund. Hvis bruker ikke er admin, kreves en autorisasjon for det aktuelle studieforbundet."""
 	bruker = ndb.UserProperty(auto_current_user_add=True,indexed=True)
 	godkjent = ndb.BooleanProperty(default=False)
 	merknad = ndb.StringProperty(indexed=False)
@@ -105,8 +123,32 @@ class Autorisasjon(ndb.Model):
 	def get_requests(cls, stf):
 		return cls.query(ancestor=studieforbund_key(stf)).order(cls.bruker)
 	
-class MainPage(webapp2.RequestHandler):
-	def get(self, stf, side, entity):
+class MarkdownHandler(webapp2.RequestHandler):
+	def post(self):
+		if self.request.get('raw'):
+			self.response.write(markdown.markdown(self.request.get('raw'), output_format="html5", safe_mode='escape'))
+		else:
+			self.response.write('?')
+	
+class BaseHandler(webapp2.RequestHandler):
+	@webapp2.cached_property
+	def jinja2(self):
+		# Returns a Jinja2 renderer cached in the app registry.
+		return jinja2.get_jinja2(app=self.app)
+	
+	def check_auth(self, stf):
+		"""Sjekker autorisasjon og returnerer relaterte ting.
+		
+		:param stf:
+			string som identifiserer det aktuelle studieforbund.
+		:returns:
+			tuple:
+				editor <bool> - har brukeren skrivetilgang, 
+				pending <bool> - venter brukeren svar på skrivetilgang, 
+				user <string> - visningsnavn for brukeren, 
+				url <string> - logout/login url, 
+				autorisasjoner <list> - liste over autorisasjoner hvis bruker er admin
+		"""
 		autorisasjoner = []
 		if users.get_current_user():
 			url = users.create_logout_url(self.request.uri)
@@ -116,7 +158,6 @@ class MainPage(webapp2.RequestHandler):
 				if users.is_current_user_admin():
 					editor = True
 					pending = False
-					#TODO: Liste over autorisasjoner og forespørsler.
 					autorisasjoner = Autorisasjon.get_requests(stf).fetch()
 				else:
 					autorisasjon = Autorisasjon.get_auth(stf, users.get_current_user()).fetch(1, projection=[Autorisasjon.godkjent])
@@ -134,6 +175,17 @@ class MainPage(webapp2.RequestHandler):
 			editor = False
 			pending = False
 			user = ''
+		return editor, pending, user, url, autorisasjoner
+	
+	def render_response(self, _template, **context):
+		# Renders a template and writes the result to the response.
+		rv = self.jinja2.render_template(_template, **context)
+		self.response.write(rv)
+		
+class MainPage(BaseHandler):
+	def get(self, stf, side, entity):
+		editor, pending, user, url, autorisasjoner = self.check_auth(stf)
+		tekst = None
 		if stf and side:
 			if entity:
 				try:
@@ -150,13 +202,17 @@ class MainPage(webapp2.RequestHandler):
 					self.response.write("Systemet klarte ikke å hente oppføringen fra databasen. Kontroller at id-strengen er riktig. Kontakt VOFO dersom problemet fortsetter.")
 					self.response.set_status(500)
 					return
+			elif side in tekstsider:
+				hjelpetekster = None
+				tekstkey = ndb.Key("StudieforbundSide", str(stf), Tekst, str(side))
+				tekst = tekstkey.get()
+				if not tekst: tekst = Tekst(key=tekstkey)
 			else:
 				hjelpetekster = Hjelpetekst.query_side(stf, side).fetch()
 		else:
 			hjelpetekster = None
-		template_values = {'loginUrl':url,'studieforbund':studieforbund,'stf':stf,'sider':sider,'side':side,'hjelpetekster':hjelpetekster,'entity':entity,'editor':editor,'pending':pending,'user':user,'autorisasjoner':autorisasjoner}
-		template = JINJA_ENVIRONMENT.get_template('admin_template.html')
-		self.response.write(template.render(template_values))
+		template_values = {'loginUrl':url,'studieforbund':studieforbund,'stf':stf,'sider':sider,'side':side,'hjelpetekster':hjelpetekster,'tekst':tekst,'entity':entity,'editor':editor,'pending':pending,'user':user,'autorisasjoner':autorisasjoner}
+		self.render_response('admin_default.html', **template_values)
 	def post(self, stf, side, entity):
 		if users.get_current_user():
 			if users.is_current_user_admin():
@@ -173,10 +229,12 @@ class MainPage(webapp2.RequestHandler):
 					return
 		else:
 			self.response.write("Ingen tilgang. Du må være logget inn for å gjøre endringer i systemet.")
-			self.response.set_status(403)
+			self.response.set_status(401)
 			return
 		if stf and side:
 			if entity == 'publiser':
+				if side in tekstsider:
+					side = '1000' #tekstsider publiseres sammen med side 1000
 				bucket_name = os.environ.get('BUCKET_NAME', app_identity.get_default_gcs_bucket_name())
 				gcs_filename = '/' + bucket_name + '/h1/' + str(stf) + '-' + str(side) + '.json'
 				gcs_file = gcs.open(gcs_filename, 'w', content_type='application/json', options={'x-goog-acl': 'public-read'})
@@ -184,6 +242,24 @@ class MainPage(webapp2.RequestHandler):
 				gcs_file.close()
 				self.response.set_status(202) # Accepted.
 				return
+			elif side in tekstsider:
+				hjelpetekster = None
+				tekstkey = ndb.Key("StudieforbundSide", str(stf), Tekst, str(side))
+				tekst = tekstkey.get()
+				successnummer = '4'
+				if not tekst: 
+					tekst = Tekst(key=tekstkey)
+					successnummer = '3'
+				try:
+					tekst.raw = self.request.get('raw')
+					tekst.html = markdown.markdown(tekst.raw, output_format="html5", safe_mode='escape')
+					tekst.publisert = bool(self.request.get('publisert'))
+					tekst.bruker = users.get_current_user()
+					tekst.put()
+				except:
+					self.response.write("Forespørselen din inneholder feil, som gjør at posten ikke kan lagres.")
+					self.response.set_status(400)
+					return
 			elif entity:
 				successnummer = '0'
 				try:
@@ -231,23 +307,22 @@ class AuthHandler(webapp2.RequestHandler):
 			autorisasjon = Autorisasjon(parent = studieforbund_key(stf))
 			autorisasjon.merknad = self.request.get('merknad')
 			autorisasjon.put()
-			mail.send_mail(sender="KursAdmin hjelpetekst <mg@vofo.no>",
-              to="Mats Grimsgaard <mg@vofo.no>",
+			mail.send_mail_to_admins(sender="%s <%s>" % (autorisasjon.bruker, autorisasjon.bruker.email()),
               subject="Søknad om tilgang til stf " + stf,
               body=u"""
-				Hei Mats
+Hei Mats
 
-				Brukeren %s 
-				søker om tilgang til hjelpetekst-appen for KursAdmin.
+Brukeren %s 
+søker om tilgang til hjelpetekst-appen for KursAdmin.
 
-				Melding fra brukeren:
-				%s
+Melding fra brukeren:
+%s
 
-				Fiks tilgang på https://hjelpetekst.appspot.com/%s
+Fiks tilgang på https://hjelpetekst.appspot.com/%s
 
-				Lykke til!
+Lykke til!
 
-				Hilsen hjelpetekst-appen
+Hilsen hjelpetekst-appen
 				""" % (autorisasjon.bruker, autorisasjon.merknad, stf))
 			self.response.set_status(202) # Accepted.
 	def post(self, stf, akey):
@@ -261,15 +336,15 @@ class AuthHandler(webapp2.RequestHandler):
               to=autorisasjon.bruker.email(),
               subject="Du har fått tilgang til hjelpetekst-appen",
               body=u"""
-				Hei
+Hei
 
-				Du har nå fått tilgang til hjelpetekst-appen for KursAdmin!
+Du har nå fått tilgang til hjelpetekst-appen for KursAdmin!
 
-				Logg inn på https://hjelpetekst.appspot.com/
+Logg inn på https://hjelpetekst.appspot.com/
 
-				Lykke til!
+Lykke til!
 
-				Hilsen hjelpetekst-appen
+Hilsen hjelpetekst-appen
 				""")
 			self.response.set_status(202) # Accepted.
 		else:
@@ -290,14 +365,25 @@ class Hjelpetekster(webapp2.RequestHandler):
 		self.response.write(hjelpeteksterJSON(stf, side))
 
 def hjelpeteksterJSON(stf, side):
-		hjelpetekster = Hjelpetekst.query_side_public(stf, side).fetch()
-		#if side <> '0':
-		#	hjelpetekster.extend(Hjelpetekst.query_side_public(stf, '0').fetch())
-		if(len(hjelpetekster)>0):
-			return '{"hjelp": ' + json.dumps([p.to_dict(include=['selector', 'tittel', 'tekst', 'video', 'link']) for p in hjelpetekster]) + '}'
-		else:
-			return '{}'
+	hjelpetekster = Hjelpetekst.query_side_public(stf, side).fetch()
+	if side == '1000':
+		keys = []
+		for tekstside in tekstsider:
+			keys.append(ndb.Key("StudieforbundSide", str(stf), Tekst, tekstside))
+		for tekst in ndb.get_multi(keys):
+			if tekst:
+				if tekst.publisert:
+					h = Hjelpetekst()
+					h.selector = "$$__%s__$$" % tekst.key.string_id()
+					h.tekst = tekst.html
+					hjelpetekster.append(h)
+	if(len(hjelpetekster)>0):
+		return '{"hjelp": ' + json.dumps([p.to_dict(include=['selector', 'tittel', 'tekst', 'video', 'link']) for p in hjelpetekster]) + '}'
+	else:
+		return '{}'
 	
-app = webapp2.WSGIApplication([('/([0-9]*)/?([0-9]*)/?([^/]*)', MainPage),
+app = webapp2.WSGIApplication([
+	('/md', MarkdownHandler),
+	('/([0-9]*)/?([0-9]+|FAQ|HJEM)?/?([^/]*)', MainPage),
 	('/auth/([0-9]+)/?([^/]*)', AuthHandler),
 	('/json-dev/([0-9]+)-([0-9]+)\.json', Hjelpetekster)], debug=True)

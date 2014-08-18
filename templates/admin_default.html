@@ -1,99 +1,5 @@
-<!DOCTYPE HTML>
-{% autoescape true %}
-<html lang=nb><head><meta charset=utf-8><title>Hjelpetekst for KursAdmin</title>
-<meta name=viewport content="width=device-width, initial-scale=1">
-<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/lumen/bootstrap.min.css" rel="stylesheet">
-<style>
-/* Space out content a bit */
-body {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-
-/* Everything but the jumbotron gets side spacing for mobile first views */
-.header,
-.marketing,
-.footer {
-  padding-right: 15px;
-  padding-left: 15px;
-}
-
-/* Custom page header */
-.header {
-  border-bottom: 1px solid #e5e5e5;
-}
-/* Make the masthead heading the same height as the navigation */
-.header h3 {
-  padding-bottom: 19px;
-  margin-top: 0;
-  margin-bottom: 0;
-  line-height: 40px;
-}
-
-/* Custom page footer */
-.footer {
-  padding-top: 19px;
-  color: #777;
-  border-top: 1px solid #e5e5e5;
-}
-
-/* Customize container */
-@media (min-width: 768px) {
-  .container {
-    max-width: 730px;
-  }
-}
-.container-narrow > hr {
-  margin: 30px 0;
-}
-
-/* Main marketing message and sign up button */
-.jumbotron {
-  text-align: center;
-}
-.jumbotron .btn {
-  padding: 14px 24px;
-  font-size: 21px;
-}
-
-/* Supporting marketing content */
-.marketing {
-  margin: 40px 0;
-}
-.marketing p + h4 {
-  margin-top: 28px;
-}
-
-/* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-  /* Remove the padding we set earlier */
-  .header,
-  .marketing,
-  .footer {
-    padding-right: 0;
-    padding-left: 0;
-  }
-  /* Space out the masthead */
-  .header {
-    margin-bottom: 30px;
-  }
-}
-
-</style>
-</head>
-<body>
-	<div class="container">
-		<div class="header">
-			<ul class="nav nav-pills pull-right">
-				<li><a href="#komigang">Kom i gang</a></li>
-			{% if user %}
-				<li class="active"><a href="{{loginUrl}}"><span class="glyphicon glyphicon-log-out"></span> Logg ut</a></li>
-			{% else %}
-				<li class="active"><a href="{{loginUrl}}"><span class="glyphicon glyphicon-log-in"></span> Logg inn</a></li>
-			{% endif %}
-			</ul>
-			<h3 class="text-muted" title="Administrasjonsprogram for hjelpetekster i KursAdmin">Hjelpetekst for KursAdmin</h3>
-		</div>
+{% extends "admin_layout.html" %}
+{% block content %}
 	{% if not editor %}
 		<div class="jumbotron">
 			<h1>Lag hjelpetekster</h1>
@@ -173,7 +79,7 @@ body {
 				<p>
 					{% if editor %}
 					<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Lagre</button>
-					<button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Slett</button>
+					<!--<button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Slett</button>-->
 					{% endif %}
 					<a href="./" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Tilbake</a>
 					<button type="button" class="btn btn-warning" id="fhvht"><span class="glyphicon glyphicon-zoom-in"></span> Forhåndsvis</button>
@@ -195,7 +101,60 @@ body {
 			</table>
 			{% endif %}
 		{% else %}
-			{% if side %}
+			{% if tekst %}
+				<form role="form" class="text-left" method="post" action="/{{ stf }}/{{ side }}">
+				<h3>Rediger hjelpeoversikt-seksjon</h3>
+					<div class="form-group">
+						<label for="raw">Tekst <small class="text-muted">&nbsp; tekstens innhold, støtter markdown-formatering (se under)</small></label>
+						<textarea name="raw" id="raw" style="height:500px" class="form-control">{{ tekst.raw }}</textarea>
+					</div>
+					<div class="checkbox"><label><input type="checkbox" name="publisert" id="publisert" value="true"{% if tekst.publisert %} checked{% endif %}> Publisert</label></div>
+					<p>
+						{% if editor %}
+						<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-disk"></span> Lagre</button>
+						<!--<button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Slett</button>-->
+						{% endif %}
+						<a href="./" class="btn btn-default"><span class="glyphicon glyphicon-arrow-left"></span> Tilbake</a>
+						<button type="button" class="btn btn-warning" id="fhvmd"><span class="glyphicon glyphicon-zoom-in"></span> Forhåndsvis</button>
+					</p>
+				</form>
+				<div id="fhvdiv" class="fhv"></div>
+				<hr>
+				<h3>Markdown-hjelp</h3>
+				<p>Her er et lite utvalg av nyttige formateringer. Skriv vanlig tekst i vanlige avsnitt, med en blank linje mellom hvert avsnitt. Dette gir universelt utformet kode.</p>
+				<h4>Overskrifter <small>(Ikke bruk overskrift 1)</small></h4>
+				<pre>
+## Overskrift 2 (størst)
+### Overskrift 3 (mindre)
+#### Overskrift 4 (mindre)</pre>
+				<h4>Utheving</h4>
+				<pre>Slik uthever du *kursiv tekst*, **fet tekst** eller ***begge deler***.</pre>
+				<p>Slik uthever du <em>kursiv tekst</em>, <strong>fet tekst</strong> eller <em><strong>begge deler</em></strong>.</p>
+				<h4>Lister</h4>
+				<pre>
+* Punktliste
+* Punktliste
+  * Underpunkt
+  * Underpunkt
+* Punktliste
+
+  Du kan ha flere avsnitt under ett punkt hvis du starter avsnittet med et passende innrykk.</pre>
+				<ul><li>Punktliste</li><li>Punktliste<ul><li>Underpunkt</li><li>Underpunkt</li></ul></li><li><p>Punktliste</p><p>Du kan ha flere avsnitt under ett punkt hvis du starter avsnittet med et passende innrykk.</p></li></ul>
+				<pre>
+1. Nummerert liste
+2. Nummerert liste</pre>
+				<ol><li>Nummerert liste</li><li>Nummerert liste</li></ol>
+				<p>Nummerert liste og punktliste kan blandes og legges i flere nivåer.</p>
+				<h4>Lenker</h4>
+				<pre>Slik lager du en [lenke til Google](https://www.google.com), 
+eller til [en annen side](http://funkis.no/node/195 "med titteltekst").</pre>
+				<p>Slik lager du en <a href="https://www.google.com">lenke til Google</a>, eller til <a href="http://funkis.no/node/195" title="med titteltekst">en annen side</a>.</p>
+				<h4>Bilder</h4>
+				<pre>Slik setter du inn et bilde: ![alternativ tekst](http://funkis.no/sites/default/files/styles/thumbnail/public/field/image/077_1.jpg "Valgfri titteltekst")</pre>
+				<p>Slik setter du inn et bilde: <img alt="alternativ tekst" src="http://funkis.no/sites/default/files/styles/thumbnail/public/field/image/077_1.jpg" title="Valgfri titteltekst"></p>
+				<h4>Horisontal linje</h4>
+				<pre>---</pre>
+			{% elif side %}
 				<div class="alert alert-info"><em>Ingen hjelpetekster er lagt inn i denne visiningen.</em></div>
 			{% else %}
 				<div class="alert alert-warning"><em>Velg en visning fra lista over.</em></div>
@@ -203,34 +162,4 @@ body {
 		{% endif %}
 		<hr>
 	{% endif %}
-		<h2 id="komigang">Kom i gang med hjelpetekster</h2>
-		<p class="lead">Her er noen enkle instrukser for å hjelpe deg i gang.</p>
-		<h3>1. Logg inn og få tilgang</h3>
-		<p>Aller først må du logge inn. Du kan bruke en eksisterende Google-konto, eller opprette en ny. Når du er innlogget må du få tilgang til å redigere i ditt studieforbund. Velg studieforbundet ditt, og klikk "Søk om tilgang". Denne søknaden behandles manuelt, så ta høyde for at det kan ta noen dager før du får tilgang.</p>
-		<h3>2. Velg visning</h3>
-		<p>Når du er logget inn og har valgt riktig studieforbund, må du velge hvilken visning du skal lage hjelpetekster for. Du får da opp en liste over alle eksisterende hjelpetekster i den aktuelle visningen.</p>
-		<h3>3. Lag og rediger hjelpetekster</h3>
-		<p>Du kan opprette en ny, eller redigere en eksisterende hjelpetekst. Du kan når som helst forhåndsvise endringene dine. Husk å lagre endringene.</p>
-		<h3>4. Test og publiser</h3>
-		<p>Logg inn i testmiljøet i KursAdmin og sjekk at hjelpetekstene du har endret eller lagt inn oppfører seg som du forventer. Dersom alt er i orden, kan du gå tilbake til visningen i dette programmet, og velge "Legg ut i produksjon". Endringene vil være synlig i KursAdmin i løpet av kort tid.</p>
-		<p>Lykke til!</p>
-		<div class="footer">
-			{% if user %}<p class="text-center">Du er logget inn som <strong>{{ user }}</strong>. (<a href="{{url}}">Logg ut</a>)</p>{% endif %}
-			<p class="text-center">&copy; 2014 <a href="http://www.funkis.no">Studieforbundet Funkis</a> &nbsp;·&nbsp; Utviklet av <a href="http://www.vofo.no">Voksenopplæringsforbundet</a> &nbsp;·&nbsp; <a href="https://github.com/vofo-no/kursadmin-hjelpetekster/">GitHub</a></p>
-		</div>
-	{% if autorisasjoner %}
-		<h4>Admin</h4>
-		<ul class="list-group">
-		{% for autorisasjon in autorisasjoner %}
-			<li class="list-group-item"><h4 class="list-group-item-heading">{% if not autorisasjon.godkjent %}<button class="btn btn-sm pull-right btn-info" onclick="authGodkjenn('{{ autorisasjon.key.urlsafe() }}',this)" style="margin-left: 4px">Godkjenn</button>{% endif %}<button class="btn btn-sm btn-danger pull-right" onclick="authSlett('{{ autorisasjon.key.urlsafe() }}', this)">Slett</button>{% if autorisasjon.godkjent %}<span class="badge badge-success">Godkjent</span> {% endif %}{{ autorisasjon.bruker.nickname() }}</h4>
-				<p class="list-group-item-text">{{ autorisasjon.merknad }}</p>
-			</li>
-		{% endfor %}
-		</ul>
-	{% endif %}
-	</div>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-	<script src="/js/site.js"></script>
-</body></html>
-{% endautoescape %}
+{% endblock %}
