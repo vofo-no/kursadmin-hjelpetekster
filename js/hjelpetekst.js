@@ -23,20 +23,20 @@
 								};
 			var insertHTMLPages = function(h,$t,$l){
 									$t.on('click', function() { 
-										var caller = this;
+										var caller_tab = this.parentNode;
 										$('#ht_p1000_cont').find(':first-child').html(h.tekst);
-										$(this).parent().parent().children().removeClass().addClass(function(){
-											return ($(this).is(':first-child') ? 'first-' : $(this).is(':last-child') ? 'last-' : '') + (caller === this ? '' : 'non-') + 'current';
+										$('#ht_p1000_tabs').find('li').removeClass().addClass(function(){
+											return ($(this).is(':first-child') ? 'first-' : $(this).is(':last-child') ? 'last-' : '') + (caller_tab === this ? '' : 'non-') + 'current';
 										});
 									});
 									$l.append($t);
 									if(h.selector==='$$__FAQ__$$') {
 										$t.attr('href', '#faq').attr('id', 'ht_p1000_cont_faq').html('<span>Ofte stilte spørsmål</span>');
-										$('#ht_p1000_tabs').append($l);
+										$('#ht_p1000_tabs').find('ul').append($l);
 									}
 									else if(h.selector==='$$__HJEM__$$') {
 										$t.attr('href', '#hjem').attr('id', 'ht_p1000_cont_hjem').html('<span>Velkommen</span>');
-										$('#ht_p1000_tabs').prepend($l);
+										$('#ht_p1000_tabs').find('ul').prepend($l);
 									}
 								};
 			var makeHjelpetekst = function($t,h,$o){
@@ -79,7 +79,7 @@
 					}
 					// Fix injected tabs in view 1000
 					if(vis == '1000') {
-						$('#ht_p1000_tabs').find('li').filter(':last-child').removeClass().addClass('last-non-current').end().filter(':first-child').removeClass().addClass('first-non-current').end().filter($('#ht_p1000_cont_' + location.hash.substr(1)).length ? ('#ht_p1000_cont_' + location.hash.substr(1)) : ':first-child').trigger('click');
+						$('#ht_p1000_tabs').find('li').filter(':last-child').removeClass().addClass('last-non-current').end().filter(':first-child').removeClass().addClass('first-non-current').end().find($('#ht_p1000_cont_' + location.hash.substr(1)).length ? ('#ht_p1000_cont_' + location.hash.substr(1)) : ':first-child').first().trigger('click');
 					}
 					console.log("Hjelpetekst.js har lagt inn " + c + " hjelpetekster i denne visningen. Prosessen tok " + (new Date().getTime() - start) + " ms.");
 				}
