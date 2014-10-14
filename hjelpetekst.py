@@ -395,6 +395,6 @@ def hjelpeteksterJSON(stf, side):
 
 app = webapp2.WSGIApplication([
 	('/md', MarkdownHandler),
-	('/([0-9]*)/?([0-9]+|FAQ|HJEM)?/?([^/]*)', MainPage),
+	('/([0-9]*)/?(T?[0-9]+)?/?([^/]*)', MainPage),
 	('/auth/([0-9]+)/?([^/]*)', AuthHandler),
 	('/json-dev/([0-9]+)-([0-9]+)\.json', Hjelpetekster)], debug=True)
