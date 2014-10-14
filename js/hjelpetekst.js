@@ -8,6 +8,8 @@
 			var start = new Date().getTime();
 			var c = 0;
 			stf = typeof stf !== 'undefined' ? stf : $('#pFlowId').val() || '';
+			// break unless stf is admitted
+			if(!($.inArray(stf, ['200','230']))) { return; }
 			vis = typeof vis !== 'undefined' ? vis : $('#pFlowStepId').val() || '';
 			baseUrl = typeof baseUrl !== 'undefined' ? baseUrl : location.hostname === 'www.kursadmin.org' ? 'https://storage.googleapis.com/hjelpetekst.appspot.com/h1' : 'https://hjelpetekst.appspot.com/json-dev';
 			$('#tabs').first().append('<li style="float:right;"><a class="tab_link" href="#" id="hjelpetekst_size_tool" style="background:yellow;border:1px solid #ABABAB;height:38px;"><small>A</small><big>A<big>A</big></big><span class="box"><span class="text">For å endre tekststørrelsen, hold Ctrl-tasten nede og trykk på + for å forstørre eller - for å forminske.</span></span></a></li>');
