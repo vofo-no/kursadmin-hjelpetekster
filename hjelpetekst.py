@@ -37,8 +37,11 @@ studieforbund = [
 	]
 sider = [
 	{ 'nr':'101','navn':u'Logg inn' },
-	{ 'nr':'HJEM','navn':u'Startside' },
-	{ 'nr':'FAQ','navn':u'Ofte stilte spørsmål' },
+	{ 'nr':'T1','navn':u'Tekstside 1' },
+	{ 'nr':'T2','navn':u'Tekstside 2' },
+	{ 'nr':'T3','navn':u'Tekstside 3' },
+	{ 'nr':'T4','navn':u'Tekstside 4' },
+	{ 'nr':'T5','navn':u'Tekstside 5' },
 	{ 'nr':'1000','navn':u'Hjem forside' },
 	{ 'nr':'2000','navn':u'Studieplan søk' },
 	{ 'nr':'2410','navn':u'Rediger studieplan steg 1' },
@@ -54,6 +57,7 @@ sider = [
 	{ 'nr':'2510','navn':u'Rediger studieplan steg 11' },
 	{ 'nr':'2500','navn':u'Rediger studieplan steg 12' },
 	{ 'nr':'2300','navn':u'Læremidler' },
+	{ 'nr':'3000','navn':u'Kurssenter' },
 	{ 'nr':'3110','navn':u'Rediger kurs - steg 1' },
 	{ 'nr':'3210','navn':u'Rediger kurs - steg 2' },
 	{ 'nr':'3120','navn':u'Rediger kurs - steg 3' },
@@ -66,11 +70,11 @@ sider = [
 	{ 'nr':'3190','navn':u'Rediger kurs - steg 10' }
 	]
 
-tekstsider = ['FAQ', 'HJEM']
+tekstsider = ['T1', 'T2', 'T3', 'T4', 'T5']
 
 def studieforbund_key(studieforbund_nr='0000',side='0'):
 	"""Studieforbund-nøkkel for å plassere i rett entity-group.
-	
+
 	:param studieforbund_nr:
 		string som identifiserer studieforbundet
 	:param side:
@@ -90,63 +94,68 @@ class Hjelpetekst(ndb.Model):
 	endret = ndb.DateTimeProperty(auto_now=True,indexed=False)
 	bruker = ndb.UserProperty(indexed=False)
 	publisert = ndb.BooleanProperty()
-	
+
 	@classmethod
 	def query_side(cls, stf, side):
 		return cls.query(ancestor=studieforbund_key(stf, side)).order(cls.selector)
 
 	@classmethod
 	def query_side_public(cls, stf, side):
-		return cls.query(cls.publisert == True, ancestor=studieforbund_key(stf, side)).order(cls.selector)
+		return cls.query(cls.publisert == True,
+										 ancestor=studieforbund_key(stf, side)).order(cls.selector)
 
 class Tekst(ndb.Model):
 	"""Modell for markdown-sider."""
 	raw = ndb.TextProperty(default='',indexed=False)
 	html = ndb.TextProperty(default='',indexed=False)
+	tittel = ndb.StringProperty(indexed=False,default='',required=True)
 	endret = ndb.DateTimeProperty(auto_now=True,indexed=False)
 	bruker = ndb.UserProperty(indexed=False)
 	publisert = ndb.BooleanProperty()
-		
+
 class Autorisasjon(ndb.Model):
-	"""Modell for autorisasjon av brukere til ulike studieforbund. Hvis bruker ikke er admin, kreves en autorisasjon for det aktuelle studieforbundet."""
+	"""Modell for autorisasjon av brukere til ulike studieforbund. Hvis bruker
+	ikke er admin, kreves en autorisasjon for det aktuelle studieforbundet."""
 	bruker = ndb.UserProperty(auto_current_user_add=True,indexed=True)
 	godkjent = ndb.BooleanProperty(default=False)
 	merknad = ndb.StringProperty(indexed=False)
 	dato = ndb.DateTimeProperty(auto_now_add=True,indexed=False)
 	endret = ndb.DateTimeProperty(auto_now=True,indexed=False)
 	endret_av = ndb.UserProperty(auto_current_user=True,indexed=False)
-	
+
 	@classmethod
 	def get_auth(cls, stf, user):
 		return cls.query(cls.bruker == user, ancestor=studieforbund_key(stf))
 	@classmethod
 	def get_requests(cls, stf):
 		return cls.query(ancestor=studieforbund_key(stf)).order(cls.bruker)
-	
+
 class MarkdownHandler(webapp2.RequestHandler):
 	def post(self):
 		if self.request.get('raw'):
-			self.response.write(markdown.markdown(self.request.get('raw'), output_format="html5", safe_mode='escape'))
+			self.response.write(markdown.markdown(self.request.get('raw'),
+																						output_format="html5",
+																						safe_mode='escape'))
 		else:
 			self.response.write('?')
-	
+
 class BaseHandler(webapp2.RequestHandler):
 	@webapp2.cached_property
 	def jinja2(self):
 		# Returns a Jinja2 renderer cached in the app registry.
 		return jinja2.get_jinja2(app=self.app)
-	
+
 	def check_auth(self, stf):
 		"""Sjekker autorisasjon og returnerer relaterte ting.
-		
+
 		:param stf:
 			string som identifiserer det aktuelle studieforbund.
 		:returns:
 			tuple:
-				editor <bool> - har brukeren skrivetilgang, 
-				pending <bool> - venter brukeren svar på skrivetilgang, 
-				user <string> - visningsnavn for brukeren, 
-				url <string> - logout/login url, 
+				editor <bool> - har brukeren skrivetilgang,
+				pending <bool> - venter brukeren svar på skrivetilgang,
+				user <string> - visningsnavn for brukeren,
+				url <string> - logout/login url,
 				autorisasjoner <list> - liste over autorisasjoner hvis bruker er admin
 		"""
 		autorisasjoner = []
@@ -176,12 +185,12 @@ class BaseHandler(webapp2.RequestHandler):
 			pending = False
 			user = ''
 		return editor, pending, user, url, autorisasjoner
-	
+
 	def render_response(self, _template, **context):
 		# Renders a template and writes the result to the response.
 		rv = self.jinja2.render_template(_template, **context)
 		self.response.write(rv)
-		
+
 class MainPage(BaseHandler):
 	def get(self, stf, side, entity):
 		editor, pending, user, url, autorisasjoner = self.check_auth(stf)
@@ -247,12 +256,13 @@ class MainPage(BaseHandler):
 				tekstkey = ndb.Key("StudieforbundSide", str(stf), Tekst, str(side))
 				tekst = tekstkey.get()
 				successnummer = '4'
-				if not tekst: 
+				if not tekst:
 					tekst = Tekst(key=tekstkey)
 					successnummer = '3'
 				try:
 					tekst.raw = self.request.get('raw')
 					tekst.html = markdown.markdown(tekst.raw, output_format="html5", safe_mode='escape')
+					tekst.tittel = self.request.get('tittel')
 					tekst.publisert = bool(self.request.get('publisert'))
 					tekst.bruker = users.get_current_user()
 					tekst.put()
@@ -296,7 +306,7 @@ class MainPage(BaseHandler):
 			self.response.write("Denne handlingen er ikke implementert.")
 			self.response.set_status(501)
 			return
-			
+
 class AuthHandler(webapp2.RequestHandler):
 	def put(self, stf, akey):
 		"""Oppretter en ny forespørsel om tilgang. Ignoreres dersom forespørselen finnes."""
@@ -312,7 +322,7 @@ class AuthHandler(webapp2.RequestHandler):
               body=u"""
 Hei Mats
 
-Brukeren %s 
+Brukeren %s
 søker om tilgang til hjelpetekst-appen for KursAdmin.
 
 Melding fra brukeren:
@@ -375,13 +385,14 @@ def hjelpeteksterJSON(stf, side):
 				if tekst.publisert:
 					h = Hjelpetekst()
 					h.selector = "$$__%s__$$" % tekst.key.string_id()
+					h.tittel = tekst.tittel
 					h.tekst = tekst.html
 					hjelpetekster.append(h)
 	if(len(hjelpetekster)>0):
 		return '{"hjelp": ' + json.dumps([p.to_dict(include=['selector', 'tittel', 'tekst', 'video', 'link']) for p in hjelpetekster]) + '}'
 	else:
 		return '{}'
-	
+
 app = webapp2.WSGIApplication([
 	('/md', MarkdownHandler),
 	('/([0-9]*)/?([0-9]+|FAQ|HJEM)?/?([^/]*)', MainPage),

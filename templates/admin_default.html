@@ -48,7 +48,7 @@
 			<div class="col-sm-2 col-xs-6">
 				<a href="/{{ stf }}/{{ side }}/publiser" class="btn btn-warning btn-block" id="leggut" title="Legg ut i produksjon"><span class="glyphicon glyphicon-upload"></span> Legg ut</a>
 			</div>
-			{% endif %}			
+			{% endif %}
 		</div>
 		<hr>
 		{% if hjelpetekster %}
@@ -105,6 +105,10 @@
 				<form role="form" class="text-left" method="post" action="/{{ stf }}/{{ side }}">
 				<h3>Rediger hjelpeoversikt-seksjon</h3>
 					<div class="form-group">
+						<label for="tittel">Tittel <small class="text-muted">&nbsp; tittel på denne seksjonen</small></label>
+						<input type="text" name="tittel" id="tittel" required class="form-control" value="{{ tekst.tittel }}">
+					</div>
+					<div class="form-group">
 						<label for="raw">Tekst <small class="text-muted">&nbsp; tekstens innhold, støtter markdown-formatering (se under)</small></label>
 						<textarea name="raw" id="raw" style="height:500px" class="form-control">{{ tekst.raw }}</textarea>
 					</div>
@@ -146,7 +150,7 @@
 				<ol><li>Nummerert liste</li><li>Nummerert liste</li></ol>
 				<p>Nummerert liste og punktliste kan blandes og legges i flere nivåer.</p>
 				<h4>Lenker</h4>
-				<pre>Slik lager du en [lenke til Google](https://www.google.com), 
+				<pre>Slik lager du en [lenke til Google](https://www.google.com),
 eller til [en annen side](http://funkis.no/node/195 "med titteltekst").</pre>
 				<p>Slik lager du en <a href="https://www.google.com">lenke til Google</a>, eller til <a href="http://funkis.no/node/195" title="med titteltekst">en annen side</a>.</p>
 				<h4>Bilder</h4>
