@@ -24,7 +24,7 @@
 									}
 								};
 			var insertHTMLPages = function(h,$t,$l){
-									$t.on('click', function() { 
+									$t.on('click', function() {
 										var caller_tab = this.parentNode;
 										$('#ht_p1000_cont').find(':first-child').html(h.tekst);
 										$('#ht_p1000_tabs').find('li').removeClass().addClass(function(){
@@ -32,13 +32,11 @@
 										});
 									});
 									$l.append($t);
-									if(h.selector==='$$__FAQ__$$') {
-										$t.attr('href', '#faq').attr('id', 'ht_p1000_cont_faq').html('<span>Ofte stilte spørsmål</span>');
-										$('#ht_p1000_tabs').find('ul').append($l);
-									}
-									else if(h.selector==='$$__HJEM__$$') {
-										$t.attr('href', '#hjem').attr('id', 'ht_p1000_cont_hjem').html('<span>Velkommen</span>');
-										$('#ht_p1000_tabs').find('ul').prepend($l);
+									for(var text_i = 5;text_i > 0;text_i--){
+										if(h.selector==='$$__T' + text_i + '__$$') {
+											$t.attr('href', '#t' + text_i).attr('id', 'ht_p1000_cont_t' + text_i).append($('<span/>').text(h.tittel));
+											$('#ht_p1000_tabs').find('ul').append($l);
+										}
 									}
 								};
 			var makeHjelpetekst = function($t,h,$o){
@@ -81,7 +79,10 @@
 					}
 					// Fix injected tabs in view 1000
 					if(vis == '1000') {
-						$('#ht_p1000_tabs').find('li').filter(':last-child').removeClass().addClass('last-non-current').end().filter(':first-child').removeClass().addClass('first-non-current').end().find($('#ht_p1000_cont_' + location.hash.substr(1)).length ? ('#ht_p1000_cont_' + location.hash.substr(1)) : ':first-child').first().trigger('click');
+						$('#ht_p1000_tabs').find('li')
+							.filter(':last-child').removeClass().addClass('last-non-current').end()
+							.filter(':first-child').removeClass().addClass('first-non-current').end()
+							.find($('#ht_p1000_cont_' + location.hash.substr(1)).length ? ('#ht_p1000_cont_' + location.hash.substr(1)) : ':first-child').first().trigger('click');
 					}
 					console.log("Hjelpetekst.js har lagt inn " + c + " hjelpetekster i denne visningen. Prosessen tok " + (new Date().getTime() - start) + " ms.");
 				}
