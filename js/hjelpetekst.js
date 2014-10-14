@@ -63,6 +63,7 @@
 								//look for containers
 								checkAndInsertContainers($('#body'),$('#ht_p1000_cont'),$('#ht_p1000_tabs'));
 								insertHTMLPages(h,$('<a />'),$('<li class="non-current" />'));
+								c++;
 								continue; //Don't look for me in DOM...
 							}
 						}
