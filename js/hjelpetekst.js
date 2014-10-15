@@ -124,7 +124,7 @@
 				}($('<a style="width:110px; float:right;" target="_blank">Les mer</a>')));
 			}
 			$(".hjelpetekst-dialog-content", $dd).append($('<div style="clear:both;"></div>'));
-			$('#hjelpetekst_dialog').show().empty().append($dd);
+			$('#hjelpetekst_dialog').show().css('display','table').empty().append($dd);
 		},
 		video: function(vid) {
 			var $d = $('#hjelpetekst_dialog').find('p');
