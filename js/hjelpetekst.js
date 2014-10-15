@@ -1,7 +1,7 @@
 (function($){
 	'use strict';
 	$.hjelpetekst = {
-		version: '0.2',
+		version: '0.3',
 		isInitialized: false,
 		init: function(stf,vis,baseUrl){
 			if($.hjelpetekst.isInitialized) { return; }
