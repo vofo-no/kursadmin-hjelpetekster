@@ -13,6 +13,10 @@ handlers:
   static_dir: js
   secure: always
 
+- url: /css
+  static_dir: css
+  secure: always
+
 - url: /crx
   static_dir: crx
   secure: always
