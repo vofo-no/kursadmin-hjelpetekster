@@ -5,6 +5,7 @@
 		isInitialized: false,
 		init: function(stf,vis,baseUrl){
 			if($.hjelpetekst.isInitialized) { return; }
+			$.hjelpetekst.isInitialized = true;
 			var start = new Date().getTime();
 			var c = 0;
 			stf = typeof stf !== 'undefined' ? stf : $('#pFlowId').val() || '';
@@ -98,7 +99,6 @@
 			$(document).on('keydown.hjelpetekst', function(e) {
 				if(e.keyCode==27){ $.hjelpetekst.hide(); }
 			});
-			$.hjelpetekst.isInitialized = true;
 		},
 		hide: function() {
 			$("#hjelpetekst_dialog").empty().hide();
@@ -140,5 +140,5 @@
 			}
 		}
 	};
+	return $(function() {$.hjelpetekst.init(window.hjelpetekstStf, window.hjelpetekstVis, window.hjelpetekstUrl);});
 }(window.jQuery));
-window.jQuery(window.jQuery.hjelpetekst.init(window.hjelpetekstStf, window.hjelpetekstVis, window.hjelpetekstUrl));

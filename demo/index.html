@@ -6,7 +6,7 @@
 </head>
 <body style="padding: 3em">
 <h1>Eksempelskjema</h1>
-<input type="hidden" name="p_flow_id" value="1" id="pFlowId">
+<input type="hidden" name="p_flow_id" value="230" id="pFlowId">
 <input type="hidden" name="p_flow_step_id" value="01" id="pFlowStepId">
 <table id="apex_layout_126273541663149403" border="0" class="formlayout" summary="" role="presentation"><tbody><tr><td align="left"><label for="P3110_CRS_CURR_ID" tabindex="999"><span class="required">Studieplan</span><img src="img/required.png" alt="Value Required" tabindex="999"></label></td><td align="left"><input type="hidden" name="p_arg_names" value="126274336133149416"><input type="text" id="P3110_CRS_CURR_ID" name="p_t02" class="number_field" value="" size="5" maxlength="255" style="text-align:right"><span class="hidden-label">Curr Btns</span><span id="P3110_CURR_BTNS" class="display_only"><a href="#"><img src="img/magnifier.png"></a></span><label for="P3110_CURRICULUM_NAME" tabindex="999"><span class="optional"></span></label> <span id="P3110_CURRICULUM_NAME" class="display_only"></span><label for="P3110_CURR_INFO" tabindex="999" style="display: none;"><span class="optional"></span></label><span id="P3110_CURR_INFO" class="display_only" style="display: none;"><a href="javascript:showModal( 'Vis studieplan'/*p_window_title*/,3112/*p_page_id*/,'P3112_CURR_ID'/*p_pk_field_name*/,$('#P3110_CRS_CURR_ID').val()/*p_pk_field_value*/,700/*p_window_width*/,400/*p_window_height*/,30/*p_padd_hor*/,30/*p_padd_vert*/,'P3110_CRS_CURR_ID'	/*p_item_to_select*/);"></a></span></td><td align="left"><label for="P3110_CRS_STATUS" tabindex="999"><span class="optional">Status</span></label></td><td align="left"><input type="hidden" name="p_arg_names" value="126275954024149418"><select id="P3110_CRS_STATUS" name="p_t03" class="selectlist" size="1"><option value="68">Åpnet</option>
 <option value="69">Utsatt</option>
@@ -99,7 +99,7 @@
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
 <script>
-var hjelpetekstUrl = '.';
+window.hjelpetekstUrl = '.';
 (function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
   if (d.getElementById(id)) return;
