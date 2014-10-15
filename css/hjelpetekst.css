@@ -59,7 +59,7 @@ a.hjelpetekst.hjelpetekst-veiledning span {
     width: 100%;
     z-index: 1000;
     background: rgba(0,0,0,0.4);
-    display: table;
+    display: table !important;
 }
 
 #hjelpetekst_dialog > div {
